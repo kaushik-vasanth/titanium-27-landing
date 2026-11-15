@@ -53,8 +53,12 @@ export function headerComponent() {
       </button>
     </nav>
 
-    <!-- Separate Smaller Sign In Control at Far Right -->
+    <!-- Separate Smaller Sign In Control & Audio Control at Far Right -->
     <div class="ti-auth-dock">
+      <button class="ti-audio-header-btn ti-audio-toggle" type="button" data-action="toggle-audio" title="Toggle ambient atmospheric audio" aria-label="Toggle ambient atmospheric audio" aria-pressed="false">
+        <span class="ti-audio-icon is-off">${ICONS.soundOff}</span>
+        <span class="ti-audio-icon is-on" style="display:none;">${ICONS.soundOn}</span>
+      </button>
       <button type="button" class="ti-signin-ctrl" data-sealed="login" data-label="Participant Portal">
         <span class="tsc-icon">${ICONS.login}</span>
         <span class="tsc-label">Sign in</span>

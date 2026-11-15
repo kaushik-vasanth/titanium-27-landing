@@ -1,5 +1,5 @@
-// Procedural orbital backdrop: starfield, nebula, and night-side Earth
-// with procedural clouds, city lights, atmosphere and scroll dive.
+// Procedural orbital backdrop: starfield, cosmic dust, night-side Earth,
+// and a procedural 3D Moon with seamless orbital camera flight towards Moon on scroll.
 import * as THREE from 'three';
 
 const NOISE = /* glsl */`
@@ -85,6 +85,58 @@ void main(){
   gl_FragColor = vec4(col * glow * (.35 + 1.4*lit), glow);
 }`;
 
+const moonVertex = /* glsl */`
+varying vec3 vObj; varying vec3 vNormalW; varying vec3 vViewDir;
+void main(){
+  vObj = normalize(position);
+  vec4 world = modelMatrix * vec4(position,1.);
+  vNormalW = normalize(mat3(modelMatrix) * normal);
+  vViewDir = normalize(cameraPosition - world.xyz);
+  gl_Position = projectionMatrix * viewMatrix * world;
+}`;
+
+const moonFragment = /* glsl */`
+uniform vec3 uSun; uniform float uTime;
+varying vec3 vObj; varying vec3 vNormalW; varying vec3 vViewDir;
+${NOISE}
+void main(){
+  vec3 p = vObj;
+  // Lunar Maria vs Highlands
+  float maria = smoothstep(0.36, 0.65, fbm(p*2.4 + vec3(1.2, 0.4, -0.6)) + 0.25*fbm(p*5.2));
+  // Procedural craters with sharp elevated rims
+  float craterA = pow(abs(snoise(p*24.0)), 2.8)*0.45;
+  float craterB = pow(abs(snoise(p*54.0)), 3.2)*0.30;
+  float craterNoise = craterA + craterB;
+  float microDetail = fbm(p*16.0)*0.12;
+
+  vec3 highlands = vec3(0.78, 0.80, 0.86);
+  vec3 basalt = vec3(0.22, 0.23, 0.26);
+  vec3 albedo = mix(highlands, basalt, maria) - craterNoise + microDetail;
+
+  float ndl = dot(vNormalW, uSun);
+  // Terminator with high contrast crater lighting
+  float sunLit = smoothstep(-0.04, 0.22, ndl);
+  float earthShine = clamp(-ndl * 0.22, 0.0, 0.18);
+
+  // Surface direct illumination
+  vec3 lit = albedo * (sunLit * 1.35 + earthShine * vec3(0.18, 0.38, 0.65) + 0.04);
+
+  // Atmospheric limb / star scattering rim
+  float rim = pow(1.0 - max(dot(vNormalW, vViewDir), 0.0), 2.8);
+  lit += vec3(0.55, 0.82, 1.0) * rim * (sunLit * 0.45 + 0.15);
+
+  gl_FragColor = vec4(lit, 1.0);
+}`;
+
+const moonGlowFragment = /* glsl */`
+varying vec3 vNormalW; varying vec3 vViewDir;
+void main(){
+  float d = dot(vNormalW, vViewDir);
+  float glow = pow(clamp(1.0 - d, 0.0, 1.0), 4.5);
+  vec3 col = vec3(0.4, 0.75, 1.0);
+  gl_FragColor = vec4(col * glow * 0.6, glow * 0.45);
+}`;
+
 const skyFragment = /* glsl */`
 varying vec3 vObj; uniform float uTime;
 ${NOISE}
@@ -125,24 +177,25 @@ export function createSpace(canvas) {
   renderer.setClearColor(0x01030a, 1);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(48, 1, 0.05, 600);
-  const sun = new THREE.Vector3(-0.85, 0.18, -0.95).normalize();
+  const camera = new THREE.PerspectiveCamera(48, 1, 0.05, 700);
+  const sun = new THREE.Vector3(-0.85, 0.22, -0.92).normalize();
 
+  // Cosmic Nebula Sky
   const sky = new THREE.Mesh(
-    new THREE.SphereGeometry(400, 48, 32),
+    new THREE.SphereGeometry(450, 48, 32),
     new THREE.ShaderMaterial({ uniforms: { uTime: { value: 0 } }, vertexShader: earthVertex, fragmentShader: skyFragment, side: THREE.BackSide, depthWrite: false }),
   );
   scene.add(sky);
 
   // Stars
-  const starCount = 5200;
+  const starCount = 5400;
   const pos = new Float32Array(starCount * 3), size = new Float32Array(starCount), seed = new Float32Array(starCount), color = new Float32Array(starCount * 3);
   for (let i = 0; i < starCount; i++) {
-    const u = Math.random() * 2 - 1, th = Math.random() * Math.PI * 2, r = 150 + Math.random() * 200;
+    const u = Math.random() * 2 - 1, th = Math.random() * Math.PI * 2, r = 160 + Math.random() * 220;
     const s = Math.sqrt(1 - u * u);
     pos.set([r * s * Math.cos(th), r * u, r * s * Math.sin(th)], i * 3);
     const big = Math.random() < .04;
-    size[i] = big ? 3 + Math.random() * 3 : 0.8 + Math.random() * 1.8;
+    size[i] = big ? 3.2 + Math.random() * 3.2 : 0.8 + Math.random() * 1.8;
     seed[i] = Math.random();
     const tint = Math.random();
     color.set(tint < .15 ? [1, .78, .6] : tint < .4 ? [.7, .85, 1] : [1, 1, 1], i * 3);
@@ -159,29 +212,56 @@ export function createSpace(canvas) {
   });
   scene.add(new THREE.Points(starGeo, starMat));
 
-  // Earth
-  const R = 10;
+  // Procedural Earth (Stage 1 Foreground)
+  const R_EARTH = 10;
   const earth = new THREE.Group();
   earth.position.set(0, -10.85, -7.5);
   earth.rotation.set(0.35, 0.6, 0.12);
   scene.add(earth);
   const earthUniforms = { uTime: { value: 0 }, uSun: { value: sun } };
   const planet = new THREE.Mesh(
-    new THREE.SphereGeometry(R, 160, 120),
+    new THREE.SphereGeometry(R_EARTH, 160, 120),
     new THREE.ShaderMaterial({ uniforms: earthUniforms, vertexShader: earthVertex, fragmentShader: earthFragment }),
   );
   earth.add(planet);
 
   const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(R * 1.045, 96, 64),
+    new THREE.SphereGeometry(R_EARTH * 1.045, 96, 64),
     new THREE.ShaderMaterial({ uniforms: { uSun: { value: sun }, uLimb: { value: Math.sqrt(1 - 1 / (1.045 * 1.045)) } }, vertexShader: earthVertex, fragmentShader: atmoFragment, side: THREE.BackSide, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
   );
   scene.add(atmosphere);
   atmosphere.position.copy(earth.position);
 
-  // Camera & parallax movement
-  const cameraPos = new THREE.Vector3(0, 0, 0);
-  const cameraLook = new THREE.Vector3(0, -0.24, -1);
+  // Procedural 3D Moon (Looms & Approaches as Visitor Scrolls)
+  const R_MOON = 7.8;
+  const moon = new THREE.Group();
+  moon.position.set(16.5, 10.5, -54.0);
+  moon.rotation.set(0.18, -0.32, 0.08);
+  scene.add(moon);
+
+  const moonSun = new THREE.Vector3(-0.65, 0.35, 0.70).normalize();
+  const moonUniforms = { uTime: { value: 0 }, uSun: { value: moonSun } };
+  const moonMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(R_MOON, 128, 96),
+    new THREE.ShaderMaterial({ uniforms: moonUniforms, vertexShader: moonVertex, fragmentShader: moonFragment }),
+  );
+  moon.add(moonMesh);
+
+  // Lunar Atmospheric / Celestial Glow Shell
+  const moonGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(R_MOON * 1.045, 64, 48),
+    new THREE.ShaderMaterial({
+      vertexShader: moonVertex,
+      fragmentShader: moonGlowFragment,
+      side: THREE.BackSide,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    }),
+  );
+  moon.add(moonGlow);
+
+  // Camera & Trajectory Controller
   const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
   let scrollRatio = 0;
   let scrollTarget = 0;
@@ -203,35 +283,49 @@ export function createSpace(canvas) {
   addEventListener('resize', resize);
 
   let last = performance.now(), time = 0, raf = 0, running = true;
-  const look = new THREE.Vector3();
+  const currentPos = new THREE.Vector3();
+  const currentLook = new THREE.Vector3();
 
   function frame(t) {
     raf = requestAnimationFrame(frame);
     if (!running || document.hidden) { last = t; return; }
     const dt = Math.min(.05, (t - last) / 1000); last = t; time += dt;
 
-    scrollRatio += (scrollTarget - scrollRatio) * 0.08;
+    // Ultra-smooth lerping for natural non-awkward momentum
+    scrollRatio += (scrollTarget - scrollRatio) * 0.048;
 
-    pointer.sx += (pointer.x - pointer.sx) * .04;
-    pointer.sy += (pointer.y - pointer.sy) * .04;
+    pointer.sx += (pointer.x - pointer.sx) * .035;
+    pointer.sy += (pointer.y - pointer.sy) * .035;
 
-    camera.position.copy(cameraPos);
-    camera.position.x += pointer.sx * .35;
-    camera.position.y -= pointer.sy * .18;
-    camera.position.y += scrollRatio * 3.4; // smooth descent dive
+    // Earth gracefully descends as visitor embarks on orbital flight
+    earth.position.y = -10.85 - scrollRatio * 20.0;
+    atmosphere.position.copy(earth.position);
 
-    look.copy(cameraLook);
-    look.x += pointer.sx * .12;
-    look.y -= scrollRatio * 4.8; // tilts horizon downward smoothly
-    camera.lookAt(look);
+    // Orbital flight trajectory towards the Moon
+    // Stage 1 (0.0): View of Earth horizon, Moon is small in distant upper right
+    // Stage 2 (0.5): Earth glides down, Camera accelerates forward through stars
+    // Stage 3 (1.0): Camera arrives in Moon proximity, Moon fills right sky with realistic detail!
+    currentPos.x = pointer.sx * 0.3 + scrollRatio * 9.5;
+    currentPos.y = -pointer.sy * 0.15 + scrollRatio * 5.8;
+    currentPos.z = -scrollRatio * 32.0;
+
+    currentLook.x = pointer.sx * 0.1 + scrollRatio * 13.0;
+    currentLook.y = -0.24 - (1.0 - scrollRatio) * 0.2 + scrollRatio * 7.5;
+    currentLook.z = -1.0 - scrollRatio * 36.0;
+
+    camera.position.copy(currentPos);
+    camera.lookAt(currentLook);
 
     camera.fov = 48 + (camera.userData.portrait || 0);
     camera.updateProjectionMatrix();
 
+    // Procedural rotations & time updates
     earthUniforms.uTime.value = time;
+    moonUniforms.uTime.value = time;
     starMat.uniforms.uTime.value = time;
     sky.material.uniforms.uTime.value = time;
-    planet.rotation.y += dt * .006;
+    planet.rotation.y += dt * 0.005;
+    moonMesh.rotation.y += dt * 0.003;
 
     renderer.render(scene, camera);
   }

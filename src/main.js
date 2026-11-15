@@ -1,14 +1,12 @@
 // TITANIUM 2027 — Landing Page Standalone Application
 import './styles/global.css';
 import './styles/header.css';
-import './styles/dock.css';
 import './styles/home.css';
 import './styles/sealed.css';
 
 import { createSpace } from './components/space.js';
 import { toggleAudio, isAudioActive, onAudioStateChange } from './components/audio.js';
 import { headerComponent } from './components/header.js';
-import { dockComponent } from './components/dock.js';
 import { renderSealedChamber, bindSealedEvents, closeChamber } from './components/sealedChamber.js';
 import { ICONS } from './components/icons.js';
 
@@ -100,50 +98,68 @@ function heroModuleCard(m, i) {
   </button>`;
 }
 
-function sectorCard(s, i) {
-  return `<article class="experience-card" data-sealed="${s.id}" style="--i:${i}">
-    <div class="exp-card-top">
-      <span class="exp-card-icon">${s.icon}</span>
-      <span class="exp-card-track">${s.track}</span>
+function statStrip() {
+  return `<div class="telemetry-stat-strip">
+    <div class="tss-item">
+      <div class="tss-num-row">
+        <span class="tss-num">09</span>
+        <span class="tss-unit">Tracks</span>
+      </div>
+      <strong class="tss-label">Flagship Arenas</strong>
+      <p class="tss-detail">Robo-Wars, Hackathons, Paper presentations & AI Summits</p>
     </div>
-    <h3 class="exp-card-title">${s.title}</h3>
-    <p class="exp-card-desc">${s.desc}</p>
-    <div class="exp-card-bottom">
-      <span class="exp-card-meta">${s.meta}</span>
-      <span class="exp-card-cta">
-        <span>${s.cta}</span>
-        ${ICONS.arrow}
-      </span>
+    <div class="tss-divider" aria-hidden="true"></div>
+    <div class="tss-item">
+      <div class="tss-num-row">
+        <span class="tss-num">₹10L+</span>
+        <span class="tss-unit">Pool</span>
+      </div>
+      <strong class="tss-label">Prize Bounty</strong>
+      <p class="tss-detail">Cash prizes, venture mentorship & incubator awards</p>
     </div>
-  </article>`;
+    <div class="tss-divider" aria-hidden="true"></div>
+    <div class="tss-item">
+      <div class="tss-num-row">
+        <span class="tss-num">15K+</span>
+        <span class="tss-unit">Delegates</span>
+      </div>
+      <strong class="tss-label">National Delegates</strong>
+      <p class="tss-detail">Engineers, creators, developers and student pioneers</p>
+    </div>
+    <div class="tss-divider" aria-hidden="true"></div>
+    <div class="tss-item">
+      <div class="tss-num-row">
+        <span class="tss-num">50+</span>
+        <span class="tss-unit">Institutes</span>
+      </div>
+      <strong class="tss-label">Top Engineering Colleges</strong>
+      <p class="tss-detail">Leading universities and technical institutes across India</p>
+    </div>
+  </div>`;
+}
+
+function manifestRow(s, i) {
+  const num = String(i + 1).padStart(2, '0');
+  return `<div class="manifest-row" data-sealed="${s.id}" tabindex="0" role="button" aria-label="${s.title}">
+    <div class="mr-lead">
+      <span class="mr-index">${num}</span>
+      <div class="mr-titles">
+        <h3 class="mr-title">${s.title}</h3>
+        <span class="mr-track">${s.track}</span>
+      </div>
+    </div>
+    <p class="mr-desc">${s.desc}</p>
+    <div class="mr-trail">
+      <span class="mr-meta">${s.meta}</span>
+      <span class="mr-gate-badge">SEALED</span>
+      <span class="mr-arrow" aria-hidden="true">${ICONS.arrow}</span>
+    </div>
+  </div>`;
 }
 
 function renderLanding() {
   return `
     ${headerComponent()}
-
-    <!-- Floating Flight Telemetry Stage Navigator -->
-    <aside class="ti-telemetry-rail" aria-label="Flight stage navigation">
-      <div class="ttr-track">
-        <button type="button" class="ttr-step is-active" data-stage-target="stage-orbit" title="Jump to Stage 1: Orbit">
-          <span class="ttr-pip"></span>
-          <span class="ttr-tag">STAGE 01</span>
-          <span class="ttr-label">ORBIT</span>
-        </button>
-        <span class="ttr-connector" aria-hidden="true"></span>
-        <button type="button" class="ttr-step" data-stage-target="stage-descent" title="Jump to Stage 2: Descent">
-          <span class="ttr-pip"></span>
-          <span class="ttr-tag">STAGE 02</span>
-          <span class="ttr-label">DESCENT</span>
-        </button>
-        <span class="ttr-connector" aria-hidden="true"></span>
-        <button type="button" class="ttr-step" data-stage-target="stage-experience" title="Jump to Stage 3: Experience">
-          <span class="ttr-pip"></span>
-          <span class="ttr-tag">STAGE 03</span>
-          <span class="ttr-label">EXPERIENCE</span>
-        </button>
-      </div>
-    </aside>
 
     <main class="ti-landing-container" id="focus">
       <!-- STAGE 1 — ORBIT -->
@@ -188,31 +204,10 @@ function renderLanding() {
             <p class="descent-subheading">Transitioning from low-Earth orbit to the campus of Rajalakshmi Engineering College, Chennai. Ground stations fully illuminated for India's largest technical convergence.</p>
           </div>
 
-          <div class="descent-telemetry-grid">
-            <div class="dtg-cell">
-              <span class="dtg-num">09</span>
-              <span class="dtg-title">Technical Tracks</span>
-              <span class="dtg-note">Robo-Wars, Hackathons, Paper presentations & AI Summits</span>
-            </div>
-            <div class="dtg-cell">
-              <span class="dtg-num">₹10L+</span>
-              <span class="dtg-title">Prize Bounty</span>
-              <span class="dtg-note">Cash prizes, venture mentorship & incubator awards</span>
-            </div>
-            <div class="dtg-cell">
-              <span class="dtg-num">15K+</span>
-              <span class="dtg-title">National Delegates</span>
-              <span class="dtg-note">Engineers, creators, developers and student pioneers</span>
-            </div>
-            <div class="dtg-cell">
-              <span class="dtg-num">50+</span>
-              <span class="dtg-title">Institutions</span>
-              <span class="dtg-note">Top engineering and research colleges across India</span>
-            </div>
-          </div>
+          ${statStrip()}
 
           <button type="button" class="ti-scroll-cue" data-stage-target="stage-experience" aria-label="Enter festival experience sectors">
-            <span class="tsc-label">ENTER FESTIVAL SECTORS</span>
+            <span class="tsc-label">EXPLORE FESTIVAL DIRECTORY</span>
             <span class="tsc-arrow" aria-hidden="true">${ICONS.arrow}</span>
           </button>
         </div>
@@ -224,17 +219,15 @@ function renderLanding() {
           <div class="experience-header">
             <p class="eyebrow">STAGE 03 // SURFACE TERMINAL</p>
             <h2 class="experience-heading">THE FESTIVAL EXPERIENCE</h2>
-            <p class="experience-subheading">Every arena is engineered to test your technical mettle. Select your sector below to compete, build, or witness breakthrough demonstrations.</p>
+            <p class="experience-subheading">Every arena is engineered to test your technical mettle. Select a sector to inspect details.</p>
           </div>
 
-          <div class="experience-sectors">
-            ${SECTORS.map(sectorCard).join('')}
+          <div class="manifest-directory">
+            ${SECTORS.map(manifestRow).join('')}
           </div>
         </div>
       </section>
     </main>
-
-    ${dockComponent()}
   `;
 }
 
