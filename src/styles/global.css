@@ -1,0 +1,84 @@
+:root {
+  color-scheme: dark;
+  --ink: #eef6ff;
+  --ink-soft: #bdd0e6;
+  --ink-mute: #7f97b3;
+  --cyan: #5fe0ff;
+  --cyan-hi: #b8f3ff;
+  --cyan-glow: rgba(95, 224, 255, .55);
+  --red: #ff2e45;
+  --red-glow: rgba(255, 46, 69, .6);
+  --glass: rgba(6, 14, 28, .75);
+  --line: rgba(160, 214, 255, .2);
+  --line-hi: rgba(180, 230, 255, .45);
+  --f-display: 'Exo 2', 'Rajdhani', system-ui, sans-serif;
+  --f-ui: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+  --f-body: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  --f-mono: 'Share Tech Mono', ui-monospace, monospace;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #01030a;
+  color: var(--ink);
+  font-family: var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+}
+
+#space {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; }
+:focus-visible { outline: 1px solid var(--cyan-hi); outline-offset: 3px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+/* Ambient high-tech scanlines overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, .25) 51%);
+  background-size: 100% 4px;
+  opacity: .35;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  50% { opacity: .25; }
+}

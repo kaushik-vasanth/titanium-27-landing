@@ -1,0 +1,172 @@
+/* ───────────────────────── Bottom Information & Control Dock ───────────────────────── */
+.ti-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px clamp(16px, 3vw, 44px);
+  gap: 16px;
+  background: linear-gradient(180deg, rgba(2, 6, 14, 0) 0%, rgba(2, 6, 14, .85) 25%, rgba(2, 6, 14, .96) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(160, 214, 255, .15);
+  animation: fade-up 0.8s var(--ease) 0.8s both;
+}
+
+.ti-dock-utilities, .ti-dock-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.ti-dock-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(160, 214, 255, .2);
+  border-radius: 7px;
+  color: var(--ink-soft);
+  background: rgba(10, 22, 42, .65);
+  font: 600 11px/1 var(--f-ui);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: color .2s, border-color .2s, box-shadow .2s, transform .2s, background .2s;
+}
+.ti-dock-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.ti-dock-btn:hover {
+  color: #fff;
+  border-color: var(--cyan);
+  background: rgba(16, 36, 64, .9);
+  box-shadow: 0 0 12px rgba(95, 224, 255, .3);
+  transform: translateY(-1px);
+}
+.ti-dock-btn-pass {
+  border-color: rgba(95, 224, 255, .4);
+  color: var(--cyan-hi);
+  background: rgba(12, 34, 60, .55);
+}
+.tdb-pass-label {
+  font: 700 10.5px/1 var(--f-ui);
+  letter-spacing: .16em;
+}
+
+/* Authentic Festival Metadata */
+.ti-dock-fest-info {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 0 12px;
+}
+.tdfi-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 11px/1 var(--f-mono);
+  letter-spacing: .14em;
+  white-space: nowrap;
+}
+.tdfi-badge {
+  font-weight: 700;
+  font-size: 9.5px;
+  color: var(--cyan);
+  letter-spacing: .18em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(95, 224, 255, .12);
+  border: 1px solid rgba(95, 224, 255, .28);
+}
+.tdfi-dot {
+  color: rgba(160, 214, 255, .35);
+}
+.tdfi-title {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+.tdfi-date {
+  color: var(--ink-soft);
+}
+.tdfi-venue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 11px/1.2 var(--f-body);
+  letter-spacing: .06em;
+  color: var(--ink-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tdfi-globe svg {
+  width: 13px;
+  height: 13px;
+  color: var(--cyan);
+}
+
+/* Audio Synthesizer Drone Toggle & Social Channels */
+.ti-audio-toggle[aria-pressed="true"] {
+  border-color: var(--cyan);
+  color: var(--cyan-hi);
+  background: rgba(16, 42, 76, .95);
+  box-shadow: 0 0 14px rgba(95, 224, 255, .4);
+}
+.ti-dock-socials {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(160, 214, 255, .16);
+}
+.ti-social-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid rgba(160, 214, 255, .16);
+  background: rgba(8, 18, 34, .55);
+  color: var(--ink-mute);
+  transition: color .2s, border-color .2s, box-shadow .2s, transform .2s, background .2s;
+}
+.ti-social-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.ti-social-btn:hover {
+  color: #fff;
+  border-color: var(--cyan);
+  background: rgba(16, 36, 64, .9);
+  box-shadow: 0 0 10px rgba(95, 224, 255, .3);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1100px) {
+  .tdfi-venue { display: none; }
+}
+@media (max-width: 900px) {
+  .ti-dock {
+    min-height: 58px;
+    padding: 8px 12px;
+    justify-content: space-around;
+  }
+  .tdfi-primary { font-size: 10px; gap: 5px; }
+  .tdfi-badge { font-size: 8.5px; }
+  .ti-dock-socials { display: none; }
+}
