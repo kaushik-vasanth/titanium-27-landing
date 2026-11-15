@@ -136,7 +136,7 @@ export function renderSealedChamber(sectorKey = 'events') {
 }
 
 export function bindSealedEvents(root) {
-  const overlay = root.querySelector('#sealed-overlay');
+  const overlay = root?.id === 'sealed-overlay' ? root : (root?.querySelector('#sealed-overlay') || root);
   if (!overlay) return;
 
   const form = overlay.querySelector('[data-notify-form]');
