@@ -170,6 +170,15 @@ void main(){
   gl_FragColor = vec4(vColor, a*vAlpha);
 }`;
 
+const SCENES = {
+  // Far out in space: the planet is a small crescent ahead.
+  deep: { pos: [0, 3.2, 62], look: [0, -6, -9], fov: 38 },
+  // Low orbit: Earth's night-side horizon fills the lower screen.
+  orbit: { pos: [0, 0, 0], look: [0, -0.24, -1], fov: 48 },
+};
+
+const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
 export function createSpace(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
   const pixel = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -211,6 +220,21 @@ export function createSpace(canvas) {
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   });
   scene.add(new THREE.Points(starGeo, starMat));
+
+  // Warp speed streaks during camera dive
+  const streakCount = 420;
+  const streakPos = new Float32Array(streakCount * 6);
+  const streaks = [];
+  for (let i = 0; i < streakCount; i++) {
+    const a = Math.random() * Math.PI * 2, r = 2 + Math.random() * 14;
+    streaks.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, z: -Math.random() * 120, len: 2 + Math.random() * 6 });
+  }
+  const streakGeo = new THREE.BufferGeometry();
+  streakGeo.setAttribute('position', new THREE.BufferAttribute(streakPos, 3));
+  const streakMat = new THREE.LineBasicMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+  const streakLines = new THREE.LineSegments(streakGeo, streakMat);
+  streakLines.frustumCulled = false;
+  scene.add(streakLines);
 
   // Procedural Earth (Stage 1 Foreground)
   const R_EARTH = 10;
@@ -261,7 +285,22 @@ export function createSpace(canvas) {
   );
   moon.add(moonGlow);
 
-  // Camera & Trajectory Controller
+  // Camera State & Scenes
+  const from = { pos: new THREE.Vector3(), look: new THREE.Vector3(), fov: 48 };
+  const to = { pos: new THREE.Vector3(), look: new THREE.Vector3(), fov: 48 };
+  const now = { pos: new THREE.Vector3(), look: new THREE.Vector3(), fov: 48 };
+  let travel = null;
+  let current = 'deep';
+  const setTarget = (target, name) => {
+    const s = SCENES[name] || SCENES.orbit;
+    target.pos.fromArray(s.pos);
+    target.look.fromArray(s.look);
+    target.fov = s.fov;
+    if (name === 'orbit') target.look.add(target.pos);
+  };
+  setTarget(now, current);
+
+  // Controller
   const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
   let scrollRatio = 0;
   let scrollTarget = 0;
@@ -291,6 +330,21 @@ export function createSpace(canvas) {
     if (!running || document.hidden) { last = t; return; }
     const dt = Math.min(.05, (t - last) / 1000); last = t; time += dt;
 
+    let warp = 0;
+    if (travel) {
+      const k = Math.min(1, (t - travel.start) / travel.duration);
+      const e = ease(k);
+      now.pos.lerpVectors(from.pos, to.pos, e);
+      now.look.lerpVectors(from.look, to.look, e);
+      now.fov = from.fov + (to.fov - from.fov) * e;
+      warp = Math.sin(Math.PI * Math.min(1, k * 1.15));
+      if (k >= 1) {
+        const done = travel.resolve;
+        travel = null;
+        done();
+      }
+    }
+
     // Ultra-smooth lerping for natural non-awkward momentum
     scrollRatio += (scrollTarget - scrollRatio) * 0.052;
 
@@ -298,26 +352,24 @@ export function createSpace(canvas) {
     pointer.sy += (pointer.y - pointer.sy) * .035;
 
     // SCROLL EFFECT: Move down from Earth as visitor scrolls down
-    // At scroll = 0: Camera at (0,0,0) overlooks Earth horizon at (0, -10.85, -7.5).
-    // As visitor scrolls: Camera descends DOWN along -Y, looking downwards.
-    // Earth's horizon sweeps gracefully upwards across the screen and overhead,
-    // leaving Earth behind as we plunge down into deep space with the Moon in view.
     earth.position.y = -10.85 + scrollRatio * 18.5;
     earth.position.z = -7.5 - scrollRatio * 14.0;
     atmosphere.position.copy(earth.position);
 
-    currentPos.x = pointer.sx * 0.35 + scrollRatio * 3.5;
-    currentPos.y = -pointer.sy * 0.15 - scrollRatio * 9.5;
-    currentPos.z = pointer.sy * 0.08 - scrollRatio * 4.0;
+    currentPos.copy(now.pos);
+    currentPos.x += pointer.sx * 0.35 + scrollRatio * 3.5;
+    currentPos.y -= pointer.sy * 0.15 + scrollRatio * 9.5;
+    currentPos.z += pointer.sy * 0.08 - scrollRatio * 4.0;
 
-    currentLook.x = pointer.sx * 0.12 + scrollRatio * 5.0;
-    currentLook.y = -0.24 - scrollRatio * 11.5;
-    currentLook.z = -1.0 - scrollRatio * 6.0;
+    currentLook.copy(now.look);
+    currentLook.x += pointer.sx * 0.12 + scrollRatio * 5.0;
+    currentLook.y -= scrollRatio * 11.5;
+    currentLook.z -= scrollRatio * 6.0;
 
     camera.position.copy(currentPos);
     camera.lookAt(currentLook);
 
-    camera.fov = 48 + (camera.userData.portrait || 0);
+    camera.fov = now.fov + warp * 14 + (camera.userData.portrait || 0);
     camera.updateProjectionMatrix();
 
     // Procedural rotations & time updates
@@ -328,11 +380,45 @@ export function createSpace(canvas) {
     planet.rotation.y += dt * 0.005;
     moonMesh.rotation.y += dt * 0.003;
 
+    // Warp streaks during camera dive
+    streakMat.opacity = warp * 0.75;
+    if (warp > 0.01) {
+      const fwd = new THREE.Vector3().subVectors(currentLook, camera.position).normalize();
+      const right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
+      const up = new THREE.Vector3().crossVectors(right, fwd);
+      for (let i = 0; i < streakCount; i++) {
+        const s = streaks[i];
+        s.z += dt * 160 * warp;
+        if (s.z > 0) s.z -= 120;
+        const len = s.len * (1 + warp * 6);
+        const base = camera.position.clone().addScaledVector(right, s.x).addScaledVector(up, s.y);
+        const a = base.clone().addScaledVector(fwd, -s.z);
+        const b = base.clone().addScaledVector(fwd, -s.z - len);
+        streakPos.set([a.x, a.y, a.z, b.x, b.y, b.z], i * 6);
+      }
+      streakGeo.attributes.position.needsUpdate = true;
+    }
+
     renderer.render(scene, camera);
   }
   raf = requestAnimationFrame(frame);
 
   return {
+    jump(name) {
+      current = name;
+      travel = null;
+      setTarget(now, name);
+    },
+    travel(name, duration = 3000) {
+      current = name;
+      from.pos.copy(now.pos);
+      from.look.copy(now.look);
+      from.fov = now.fov;
+      setTarget(to, name);
+      return new Promise(resolve => {
+        travel = { start: performance.now(), duration, resolve };
+      });
+    },
     setScrollProgress(ratio) {
       scrollTarget = Math.max(0, Math.min(1, Number(ratio) || 0));
     },

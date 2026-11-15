@@ -236,6 +236,7 @@ function renderLanding() {
 let space = null;
 try {
   space = createSpace(canvas);
+  space?.jump('deep');
 } catch (e) {
   console.warn('WebGL space backdrop unavailable', e);
 }
@@ -254,7 +255,17 @@ const tasks = [
 runBoot({
   full: true,
   tasks,
-}).then(() => {
+  onWarp: instant => {
+    if (!space || instant) {
+      space?.jump('orbit');
+      return Promise.resolve();
+    }
+    return space.travel('orbit', 2800);
+  },
+}).then(async ({ warp }) => {
+  if (warp) {
+    await Promise.race([warp, new Promise(r => setTimeout(r, 1600))]);
+  }
   app.style.opacity = '1';
 });
 
