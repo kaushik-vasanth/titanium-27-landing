@@ -1,135 +1,165 @@
-import { ICONS } from './icons.js';
-
+// Solo Leveling System Notification Holographic HUD Chamber
 const SECTORS = {
+  speakers: {
+    categoryTag: 'SPEAKERS · GUILD HALL',
+    sealedLine: 'Sealed · This gate has not opened yet.',
+    lore: 'Researchers, founders and engineers will share how they cleared their own gates. The line-up is being confirmed.',
+    notifyLine: 'You will be notified when it opens.',
+    primaryBtn: 'QUEST BOARD',
+    primaryAction: 'events',
+  },
   events: {
-    sector: 'SECTOR 01 // COMPETITION ARENAS',
-    title: 'EVENT CATALOGUE',
-    status: 'GATES NOT OPENED · ACCESS SEALED',
-    badge: 'TRANSMISSION ENCRYPTED',
-    tag: 'WILL BE NOTIFIED',
-    desc: 'Official national-level challenges, algorithmic problem statements, Robo-Wars brackets, and prize bounty conduits are undergoing final orbital calibration. Registration portals will open in February 2027.',
+    categoryTag: 'EVENTS · QUEST BOARD',
+    sealedLine: 'Sealed · This gate has not opened yet.',
+    lore: 'Hunters and engineers will face 9 national trial arenas from robotic combat to algorithmic cryptography. Challenge parameters are being calibrated.',
+    notifyLine: 'You will be notified when it opens.',
+    primaryBtn: 'TRAINING GROUNDS',
+    primaryAction: 'workshops',
   },
   workshops: {
-    sector: 'SECTOR 02 // RESEARCH LABS',
-    title: 'TECHNICAL WORKSHOPS',
-    status: 'LABORATORIES SEALED · ACCESS LOCKED',
-    badge: 'CLEARANCE RESTRICTED',
-    tag: 'WILL BE NOTIFIED',
-    desc: 'Hands-on deep tech masterclasses in Quantum Computing, Edge Silicon Architectures, and Neural Networks are locked under clearance protocols. Delegate seat allocations will unlock soon.',
-  },
-  speakers: {
-    sector: 'SECTOR 03 // AUDITORIUM',
-    title: 'KEYNOTE SPEAKERS',
-    status: 'TRANSMISSION EMBARGO · COMING SOON',
-    badge: 'FREQUENCY CLASSIFIED',
-    tag: 'WILL BE NOTIFIED',
-    desc: 'Addresses and symposium panels with aerospace pioneers, national research scientists, and deep-tech founders are currently under embargo. Sign up to receive immediate notification upon reveal.',
+    categoryTag: 'WORKSHOPS · TRAINING GROUNDS',
+    sealedLine: 'Sealed · This gate has not opened yet.',
+    lore: 'Masterclasses in Quantum Computing, Edge Silicon, and Neural Architectures will sharpen your abilities. Training slots are being prepared.',
+    notifyLine: 'You will be notified when it opens.',
+    primaryBtn: 'QUEST BOARD',
+    primaryAction: 'events',
   },
   exhibits: {
-    sector: 'SECTOR 04 // INNOVATION HANGAR',
-    title: 'TECHNOLOGY EXHIBITIONS',
-    status: 'ARENA GATES SEALED · ACCESS LOCKED',
-    badge: 'HANGAR SECURED',
-    tag: 'WILL BE NOTIFIED',
-    desc: 'Autonomous mobility platforms, experimental aerospace prototypes, and student engineering innovations are under secure hangar assembly. Public exhibition passes will open shortly.',
+    categoryTag: 'EXHIBITS · RELICS',
+    sealedLine: 'Sealed · This gate has not opened yet.',
+    lore: 'Autonomous prototype rigs, aerospace models, and hardware artifacts are being secured in the hangar. Arena viewing conduits are locked.',
+    notifyLine: 'You will be notified when it opens.',
+    primaryBtn: 'QUEST BOARD',
+    primaryAction: 'events',
   },
   schedule: {
-    sector: 'SECTOR 05 // COMMAND CHRONOLOGY',
-    title: 'FESTIVAL SCHEDULE',
-    status: 'TIMELINE SEALED · GATES NOT OPENED',
-    badge: 'CHRONOLOGY CLASSIFIED',
-    tag: 'WILL BE NOTIFIED',
-    desc: 'The complete 3-day February 2027 timeline, stage keynote timings, and tournament match bracket schedules are being finalized by festival command.',
+    categoryTag: 'SCHEDULE · TIMELINE',
+    sealedLine: 'Sealed · This gate has not opened yet.',
+    lore: 'The 3-day February 2027 festival timeline and tournament match bracket schedules are undergoing final synchronization.',
+    notifyLine: 'You will be notified when it opens.',
+    primaryBtn: 'QUEST BOARD',
+    primaryAction: 'events',
   },
   pass: {
-    sector: 'TICKETING // ACCESS CREDENTIALS',
-    title: 'FESTIVAL ACCESS PASS',
-    status: 'BADGING CONDUIT CLOSED · ACCESS SEALED',
-    badge: 'DISPATCH SEALED',
-    tag: 'WILL BE NOTIFIED',
-    desc: 'Official festival delegate passes, workshop badges, and accommodation tiers are currently sealed. Register your frequency below to receive priority access before tickets go public.',
+    categoryTag: 'GET PASS · LICENSE',
+    sealedLine: 'Sealed · This gate has not opened yet.',
+    lore: 'Hunter licenses and early access pass tiers are being prepared for public dispatch. Registration conduits are sealed.',
+    notifyLine: 'You will be notified when it opens.',
+    primaryBtn: 'QUEST BOARD',
+    primaryAction: 'events',
   },
   login: {
-    sector: 'AUTHENTICATION GATEWAY',
-    title: 'PARTICIPANT PORTAL',
-    status: 'TERMINAL SEALED · ACCESS LOCKED',
-    badge: 'AUTHENTICATION OFFLINE',
-    tag: 'WILL BE NOTIFIED',
-    desc: 'Participant credentials, team rosters, and institutional delegate accounts will activate upon festival launch window announcement.',
+    categoryTag: 'SIGN IN · AUTHENTICATION',
+    sealedLine: 'Sealed · This gate has not opened yet.',
+    lore: 'Hunter identification cards and institutional delegate accounts will activate upon festival launch window announcement.',
+    notifyLine: 'You will be notified when it opens.',
+    primaryBtn: 'QUEST BOARD',
+    primaryAction: 'events',
   },
 };
 
-export function renderSealedChamber(sectorKey = 'events') {
-  const data = SECTORS[sectorKey] || SECTORS.events;
+const CHECK_ICON = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
+const GLYPH_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="12" rx="8" ry="10"/><ellipse cx="12" cy="12" rx="4" ry="6"/><circle cx="12" cy="12" r="1.5"/></svg>`;
 
-  return `<div class="ti-sealed-overlay" id="sealed-overlay" role="dialog" aria-modal="true" aria-labelledby="sealed-title">
-    <div class="ti-sealed-backdrop" data-action="close-chamber" aria-hidden="true"></div>
-    <div class="ti-sealed-chamber">
-      <div class="ti-chamber-frame" aria-hidden="true">
-        <span class="tcf-corner tcf-tl"></span>
-        <span class="tcf-corner tcf-tr"></span>
-        <span class="tcf-corner tcf-bl"></span>
-        <span class="tcf-corner tcf-br"></span>
-      </div>
+export function renderSealedChamber(sectorKey = 'speakers') {
+  const data = SECTORS[sectorKey] || SECTORS.speakers;
 
-      <button type="button" class="ti-chamber-close" data-action="close-chamber" title="Close chamber (ESC)" aria-label="Close chamber">
-        ${ICONS.close}
-      </button>
+  return `<div class="notif-overlay" id="sealed-overlay" role="dialog" aria-modal="true" aria-labelledby="notif-title-text">
+    <div class="notif-backdrop" data-action="close-chamber" aria-hidden="true"></div>
 
-      <div class="ti-chamber-badge-strip">
-        <span class="tcb-sector">${data.sector}</span>
-        <span class="tcb-status-pill">
-          <i class="tcb-dot" aria-hidden="true"></i>
-          <span>${data.tag}</span>
-        </span>
-      </div>
+    <div class="notif-chamber">
+      <!-- Glowing Top & Bottom Horizontal Light Rails -->
+      <div class="notif-rail notif-rail-top" aria-hidden="true"></div>
+      <div class="notif-rail notif-rail-bottom" aria-hidden="true"></div>
 
-      <div class="ti-chamber-lock-emblem">
-        <div class="tcl-ring" aria-hidden="true"></div>
-        <div class="tcl-icon">${ICONS.lock}</div>
-      </div>
+      <!-- Stepped Cybernetic Circuit Teeth on Left & Right -->
+      <svg class="notif-teeth notif-teeth-left" viewBox="0 0 32 360" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M26 0 V40 H14 V70 H26 V130 H8 V150 H26 V210 H14 V240 H26 V290 H8 V320 H26 V360" stroke="#5fe0ff" stroke-width="2.5" fill="none" vector-effect="non-scaling-stroke" />
+        <path d="M20 50 H8 V60 H20" stroke="#5fe0ff" stroke-width="1.5" fill="none" />
+        <path d="M20 220 H8 V230 H20" stroke="#5fe0ff" stroke-width="1.5" fill="none" />
+        <rect x="2" y="136" width="4" height="8" fill="#5fe0ff" />
+        <rect x="2" y="296" width="4" height="8" fill="#5fe0ff" />
+      </svg>
+      <svg class="notif-teeth notif-teeth-right" viewBox="0 0 32 360" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M6 0 V40 H18 V70 H6 V130 H24 V150 H6 V210 H18 V240 H6 V290 H24 V320 H6 V360" stroke="#5fe0ff" stroke-width="2.5" fill="none" vector-effect="non-scaling-stroke" />
+        <path d="M12 50 H24 V60 H12" stroke="#5fe0ff" stroke-width="1.5" fill="none" />
+        <path d="M12 220 H24 V230 H12" stroke="#5fe0ff" stroke-width="1.5" fill="none" />
+        <rect x="26" y="136" width="4" height="8" fill="#5fe0ff" />
+        <rect x="26" y="296" width="4" height="8" fill="#5fe0ff" />
+      </svg>
 
-      <div class="ti-chamber-heading">
-        <span class="ti-chamber-subtag">${data.badge}</span>
-        <h2 class="ti-chamber-status" id="sealed-title">${data.status}</h2>
-        <h3 class="ti-chamber-target">${data.title}</h3>
-      </div>
+      <!-- Inner Holographic Cockpit Frame -->
+      <div class="notif-screen">
+        <button type="button" class="notif-close-corner" data-action="close-chamber" title="Dismiss Notification" aria-label="Dismiss Notification">✕</button>
 
-      <p class="ti-chamber-desc">${data.desc}</p>
-
-      <div class="ti-chamber-action-zone">
-        <form class="ti-notify-form" data-notify-form data-sector="${sectorKey}">
-          <label class="sr" for="notify-email">Email Address</label>
-          <div class="ti-input-wrap">
-            <input
-              type="email"
-              id="notify-email"
-              class="ti-notify-input"
-              placeholder="Enter email to receive priority dispatch..."
-              required
-              autocomplete="email"
-            />
-            <button type="submit" class="ti-notify-btn">
-              <span class="tnb-icon">${ICONS.bell}</span>
-              <span>WILL BE NOTIFIED</span>
-            </button>
+        <!-- Header: Glyph Box + NOTIFICATION Box -->
+        <div class="notif-header">
+          <div class="notif-glyph-box" aria-hidden="true">
+            ${GLYPH_ICON}
           </div>
-        </form>
-        <div class="ti-notify-success" data-notify-success style="display:none;">
-          <span class="tns-icon">${ICONS.check}</span>
-          <div class="tns-copy">
-            <b>UPLINK RECORDED · WILL BE NOTIFIED</b>
-            <small>Your frequency has been added to priority dispatch when gates unlock.</small>
+          <div class="notif-title-box">
+            <span class="notif-title" id="notif-title-text">NOTIFICATION</span>
           </div>
         </div>
-      </div>
 
-      <div class="ti-chamber-footer">
-        <span class="tcf-meta">TITANIUM // 2027 · RAJALAKSHMI ENGINEERING COLLEGE · CHENNAI</span>
-        <button type="button" class="ti-return-btn" data-action="close-chamber">
-          <span>RETURN TO ORBIT</span>
-          ${ICONS.arrow}
-        </button>
+        <!-- Category Tag in Red -->
+        <div class="notif-category">${data.categoryTag}</div>
+
+        <!-- System Message Rows with Checkboxes -->
+        <div class="notif-body-list">
+          <div class="notif-row">
+            <span class="notif-bullet">•</span>
+            <span class="notif-text">[ ${data.sealedLine} ]</span>
+            <span class="notif-checkbox" aria-hidden="true">${CHECK_ICON}</span>
+          </div>
+          <div class="notif-row notif-row-indent">
+            <span class="notif-bullet-space"></span>
+            <span class="notif-text">[ ${data.lore} ]</span>
+            <span class="notif-checkbox" aria-hidden="true">${CHECK_ICON}</span>
+          </div>
+          <div class="notif-row">
+            <span class="notif-bullet">•</span>
+            <span class="notif-text">[ ${data.notifyLine} ]</span>
+            <span class="notif-checkbox" aria-hidden="true">${CHECK_ICON}</span>
+          </div>
+        </div>
+
+        <!-- Priority Notification Uplink Form -->
+        <div class="notif-uplink-container">
+          <form class="notif-form" data-notify-form data-sector="${sectorKey}">
+            <div class="notif-input-row">
+              <input
+                type="email"
+                id="notif-email"
+                class="notif-email-field"
+                placeholder="Enter email to receive notification..."
+                required
+                autocomplete="email"
+              />
+              <button type="submit" class="notif-submit-btn">
+                <span>WILL BE NOTIFIED</span>
+              </button>
+            </div>
+          </form>
+          <div class="notif-success-banner" data-notify-success style="display:none;">
+            <span class="nsb-check">${CHECK_ICON}</span>
+            <span>UPLINK RECORDED · YOU WILL BE NOTIFIED WHEN THIS GATE OPENS</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="notif-action-row">
+          <button type="button" class="notif-sci-btn" data-sealed="${data.primaryAction}">
+            <span class="nsb-bracket">[</span>
+            <span class="nsb-label">${data.primaryBtn}</span>
+            <span class="nsb-bracket">]</span>
+          </button>
+          <button type="button" class="notif-sci-btn" data-action="close-chamber">
+            <span class="nsb-bracket">[</span>
+            <span class="nsb-label">RETURN TO ORBIT</span>
+            <span class="nsb-bracket">]</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>`;
@@ -141,7 +171,7 @@ export function bindSealedEvents(root) {
 
   const form = overlay.querySelector('[data-notify-form]');
   const successBox = overlay.querySelector('[data-notify-success]');
-  const input = overlay.querySelector('#notify-email');
+  const input = overlay.querySelector('#notif-email');
 
   if (form) {
     form.addEventListener('submit', e => {
@@ -179,6 +209,6 @@ export function closeChamber() {
     setTimeout(() => {
       overlay.remove();
       if (history.pushState) history.pushState(null, '', '/');
-    }, 250);
+    }, 200);
   }
 }

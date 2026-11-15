@@ -1,349 +1,309 @@
-/* TITANIUM 2027 — Sealed Chamber Telemetry Overlay */
+/* TITANIUM 2027 — Solo Leveling System Notification Holographic HUD Chamber */
 
-.ti-sealed-overlay {
+.notif-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
   place-items: center;
   padding: 20px;
-  animation: overlay-in 0.35s var(--ease) both;
+  animation: notif-fade-in 0.3s var(--ease) both;
 }
-.ti-sealed-overlay.is-closing {
-  animation: overlay-out 0.25s var(--ease) both;
+.notif-overlay.is-closing {
+  animation: notif-fade-out 0.2s var(--ease) both;
 }
-@keyframes overlay-in {
+@keyframes notif-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes overlay-out {
+@keyframes notif-fade-out {
   from { opacity: 1; }
   to { opacity: 0; }
 }
 
-.ti-sealed-backdrop {
+.notif-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(1, 4, 12, .88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(1, 4, 12, .86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.ti-sealed-chamber {
+/* ───────────────────────── The Cybernetic Holographic Chamber ───────────────────────── */
+.notif-chamber {
   position: relative;
   z-index: 1;
-  width: min(680px, 94vw);
-  background: linear-gradient(180deg, rgba(10, 24, 48, .96) 0%, rgba(4, 10, 22, .98) 100%);
-  border: 1px solid rgba(160, 214, 255, .32);
-  border-radius: 16px;
-  padding: clamp(24px, 4vw, 40px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .8), 0 0 32px rgba(255, 46, 69, .2), inset 0 1px 0 rgba(255, 255, 255, .1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 20px;
-  animation: chamber-in 0.4s var(--ease) both;
+  width: min(720px, 94vw);
+  animation: notif-chamber-in 0.35s var(--ease) both;
 }
-@keyframes chamber-in {
-  from { opacity: 0; transform: scale(0.94) translateY(14px); }
+@keyframes notif-chamber-in {
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
   to { opacity: 1; transform: none; }
 }
 
-/* Corner Architectural Brackets */
-.ti-chamber-frame {
+/* Glowing Top & Bottom Horizontal Light Rails */
+.notif-rail {
   position: absolute;
-  inset: 0;
+  left: -24px;
+  right: -24px;
+  height: 7px;
+  background: #5fe0ff;
+  border-radius: 4px;
+  box-shadow: 0 0 18px #5fe0ff, 0 0 34px rgba(95, 224, 255, .7);
+  z-index: 10;
+}
+.notif-rail-top { top: -4px; }
+.notif-rail-bottom { bottom: -4px; }
+
+/* Stepped Cybernetic Circuit Teeth */
+.notif-teeth {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  width: 32px;
+  height: calc(100% - 6px);
+  z-index: 9;
   pointer-events: none;
-  border-radius: inherit;
+  filter: drop-shadow(0 0 8px rgba(95, 224, 255, .8));
 }
-.tcf-corner {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--red);
-}
-.tcf-tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; border-top-left-radius: 16px; }
-.tcf-tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; border-top-right-radius: 16px; }
-.tcf-bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; border-bottom-left-radius: 16px; }
-.tcf-br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; border-bottom-right-radius: 16px; }
+.notif-teeth-left { left: -16px; }
+.notif-teeth-right { right: -16px; }
 
-/* Close X button */
-.ti-chamber-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  border: 1px solid rgba(160, 214, 255, .2);
-  background: rgba(8, 18, 36, .6);
-  color: var(--ink-soft);
-  transition: color .2s, border-color .2s, background .2s, transform .2s;
-}
-.ti-chamber-close svg {
-  width: 16px;
-  height: 16px;
-}
-.ti-chamber-close:hover {
-  color: #fff;
-  border-color: var(--red);
-  background: rgba(40, 10, 20, .8);
-  transform: rotate(90deg);
-}
-
-/* Badge Strip */
-.ti-chamber-badge-strip {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.tcb-sector {
-  font: 700 10.5px/1 var(--f-mono);
-  letter-spacing: .2em;
-  color: var(--cyan);
-  text-transform: uppercase;
-}
-.tcb-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 9px;
-  border-radius: 12px;
-  background: rgba(255, 46, 69, .15);
-  border: 1px solid rgba(255, 46, 69, .4);
-  font: 700 9.5px/1 var(--f-mono);
-  letter-spacing: .16em;
-  color: #ff8090;
-  text-transform: uppercase;
-}
-.tcb-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--red);
-  box-shadow: 0 0 8px var(--red);
-  animation: blink 2s infinite;
-}
-
-/* Central Lock Ring */
-.ti-chamber-lock-emblem {
+/* Inner Screen */
+.notif-screen {
   position: relative;
-  display: grid;
-  place-items: center;
-  width: 68px;
-  height: 68px;
-  margin: 4px 0;
-}
-.tcl-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 2px dashed rgba(255, 46, 69, .5);
-  animation: spin 20s linear infinite;
-}
-.tcl-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(60, 12, 24, .9), rgba(12, 4, 10, .95) 75%);
-  border: 1px solid rgba(255, 90, 110, .6);
-  display: grid;
-  place-items: center;
-  color: #ff6075;
-  box-shadow: 0 0 24px rgba(255, 46, 69, .4), inset 0 0 12px rgba(255, 46, 69, .3);
-}
-.tcl-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-/* Chamber Titles */
-.ti-chamber-heading {
+  background: radial-gradient(120% 120% at 50% 30%, rgba(8, 28, 54, .95), rgba(2, 8, 20, .98));
+  border: 1px solid rgba(95, 224, 255, .45);
+  box-shadow: inset 0 0 28px rgba(95, 224, 255, .15), 0 20px 60px rgba(0, 0, 0, .85);
+  padding: 32px clamp(20px, 4vw, 42px);
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  gap: 16px;
+  z-index: 5;
 }
-.ti-chamber-subtag {
-  font: 700 11px/1 var(--f-mono);
-  letter-spacing: .24em;
-  color: var(--cyan);
-  text-transform: uppercase;
+.notif-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 40%, rgba(95, 224, 255, .04) 41%, transparent 42%, transparent 70%, rgba(95, 224, 255, .03) 71%, transparent 72%);
+  pointer-events: none;
 }
-.ti-chamber-status {
-  margin: 0;
-  font: 700 clamp(22px, 3.2vw, 32px)/1.15 var(--f-display);
-  letter-spacing: .16em;
-  text-transform: uppercase;
+
+/* Close corner button */
+.notif-close-corner {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font: 700 16px/1 var(--f-mono);
+  color: var(--ink-mute);
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(160, 214, 255, .18);
+  background: rgba(6, 14, 28, .6);
+  transition: color .2s, border-color .2s, background .2s, transform .2s;
+  z-index: 12;
+}
+.notif-close-corner:hover {
   color: #fff;
-  text-shadow: 0 0 20px rgba(255, 70, 90, .5);
+  border-color: #ff5264;
+  background: rgba(40, 10, 20, .8);
+  transform: scale(1.1);
 }
-.ti-chamber-target {
-  margin: 0;
-  font: 700 clamp(16px, 2vw, 20px)/1 var(--f-ui);
+
+/* ───────────────────────── Header ───────────────────────── */
+.notif-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: flex-start;
+}
+.notif-glyph-box {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(95, 224, 255, .65);
+  display: grid;
+  place-items: center;
+  color: #5fe0ff;
+  background: rgba(95, 224, 255, .08);
+  box-shadow: inset 0 0 10px rgba(95, 224, 255, .25), 0 0 8px rgba(95, 224, 255, .2);
+}
+.notif-title-box {
+  border: 1px solid rgba(95, 224, 255, .65);
+  padding: 8px 36px;
+  background: rgba(95, 224, 255, .06);
+  box-shadow: inset 0 0 12px rgba(95, 224, 255, .2), 0 0 8px rgba(95, 224, 255, .15);
+}
+.notif-title {
+  font: 700 18px/1 var(--f-mono);
+  letter-spacing: .28em;
+  color: #c8f5ff;
+  text-shadow: 0 0 12px rgba(95, 224, 255, .8), 0 0 4px #5fe0ff;
+}
+
+/* ───────────────────────── Category Line ───────────────────────── */
+.notif-category {
+  font: 700 12.5px/1 var(--f-mono);
   letter-spacing: .22em;
+  color: #ff5264;
   text-transform: uppercase;
-  background: linear-gradient(180deg, #e9fdff 0%, #7fe6ff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  text-shadow: 0 0 8px rgba(255, 82, 100, .5);
+  text-align: left;
+  margin-top: 2px;
 }
 
-.ti-chamber-desc {
-  margin: 0;
-  max-width: 540px;
-  font: 500 clamp(13px, 1.2vw, 15px)/1.55 var(--f-body);
-  color: var(--ink-soft);
+/* ───────────────────────── Message Rows with Checkboxes ───────────────────────── */
+.notif-body-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  margin: 6px 0;
+}
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.notif-bullet {
+  color: #5fe0ff;
+  font-size: 16px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.notif-bullet-space {
+  width: 14px;
+  flex-shrink: 0;
+}
+.notif-text {
+  flex: 1;
+  font: 500 14px/1.55 var(--f-body);
+  color: #d6e8fa;
+  letter-spacing: .02em;
+}
+.notif-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(95, 224, 255, .6);
+  background: rgba(95, 224, 255, .1);
+  display: grid;
+  place-items: center;
+  color: #5fe0ff;
+  flex-shrink: 0;
+  margin-top: 2px;
+  box-shadow: 0 0 8px rgba(95, 224, 255, .3);
 }
 
-/* Notification Action Form */
-.ti-chamber-action-zone {
-  width: 100%;
-  max-width: 500px;
+/* ───────────────────────── Notification Uplink Form ───────────────────────── */
+.notif-uplink-container {
+  margin-top: 4px;
 }
-.ti-notify-form {
+.notif-form {
   width: 100%;
 }
-.ti-input-wrap {
+.notif-input-row {
   display: flex;
   align-items: stretch;
   gap: 8px;
-  background: rgba(6, 14, 28, .8);
-  border: 1px solid rgba(160, 214, 255, .28);
-  border-radius: 10px;
+  background: rgba(4, 12, 26, .85);
+  border: 1px solid rgba(95, 224, 255, .35);
+  border-radius: 6px;
   padding: 4px;
   transition: border-color .25s, box-shadow .25s;
 }
-.ti-input-wrap:focus-within {
-  border-color: var(--cyan);
-  box-shadow: 0 0 16px rgba(95, 224, 255, .3);
+.notif-input-row:focus-within {
+  border-color: #5fe0ff;
+  box-shadow: 0 0 16px rgba(95, 224, 255, .35);
 }
-.ti-notify-input {
+.notif-email-field {
   flex: 1;
   min-width: 0;
   background: transparent;
   border: 0;
-  padding: 10px 14px;
+  padding: 8px 12px;
   font: 500 13.5px/1 var(--f-body);
   color: #fff;
   outline: none;
 }
-.ti-notify-input::placeholder {
+.notif-email-field::placeholder {
   color: var(--ink-mute);
 }
-.ti-notify-btn {
+.notif-submit-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 18px;
-  border-radius: 8px;
-  background: linear-gradient(180deg, rgba(40, 120, 180, .7), rgba(16, 50, 90, .9));
-  border: 1px solid rgba(140, 230, 255, .6);
+  gap: 6px;
+  padding: 0 16px;
+  border: 1px solid #5fe0ff;
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(30, 90, 140, .75), rgba(12, 40, 75, .9));
   color: #fff;
-  font: 700 11.5px/1 var(--f-ui);
+  font: 700 11px/1 var(--f-mono);
   letter-spacing: .16em;
   text-transform: uppercase;
   transition: transform .2s, box-shadow .2s, background .2s;
   white-space: nowrap;
 }
-.ti-notify-btn:hover {
-  background: linear-gradient(180deg, rgba(60, 150, 220, .85), rgba(20, 70, 120, .95));
-  box-shadow: 0 0 16px rgba(95, 224, 255, .4);
+.notif-submit-btn:hover {
+  background: linear-gradient(180deg, rgba(50, 130, 190, .9), rgba(18, 60, 110, .98));
+  box-shadow: 0 0 14px rgba(95, 224, 255, .4);
   transform: translateY(-1px);
 }
-.tnb-icon svg {
-  width: 14px;
-  height: 14px;
-}
 
-/* Success notification state */
-.ti-notify-success {
+.notif-success-banner {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 18px;
-  border-radius: 10px;
-  background: rgba(14, 38, 28, .8);
-  border: 1px solid rgba(125, 255, 181, .4);
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: rgba(14, 40, 30, .85);
+  border: 1px solid rgba(125, 255, 181, .45);
+  color: #7dffb5;
+  font: 700 11.5px/1.3 var(--f-mono);
+  letter-spacing: .12em;
   text-align: left;
 }
-.tns-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(125, 255, 181, .2);
-  display: grid;
-  place-items: center;
-  color: #7dffb5;
-  flex-shrink: 0;
-}
-.tns-icon svg {
-  width: 18px;
-  height: 18px;
-}
-.tns-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.tns-copy b {
-  font: 700 12px/1 var(--f-ui);
-  letter-spacing: .14em;
-  color: #7dffb5;
-  text-transform: uppercase;
-}
-.tns-copy small {
-  font: 500 11.5px/1.3 var(--f-body);
-  color: var(--ink-soft);
+.nsb-check svg {
+  width: 16px;
+  height: 16px;
 }
 
-/* Chamber Footer */
-.ti-chamber-footer {
+/* ───────────────────────── Action Buttons ───────────────────────── */
+.notif-action-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: 4px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(160, 214, 255, .15);
+  gap: 14px;
+  margin-top: 6px;
   flex-wrap: wrap;
-  gap: 10px;
 }
-.tcf-meta {
-  font: 600 10px/1 var(--f-mono);
-  letter-spacing: .12em;
-  color: var(--ink-mute);
-  text-transform: uppercase;
-}
-.ti-return-btn {
+.notif-sci-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font: 700 11px/1 var(--f-ui);
-  letter-spacing: .16em;
+  gap: 4px;
+  padding: 9px 24px;
+  border: 1px solid #5fe0ff;
+  background: rgba(8, 24, 48, .75);
+  color: #c8f5ff;
+  font: 700 12.5px/1 var(--f-mono);
+  letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--cyan);
-  transition: color .2s, transform .2s;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  transition: background .2s, box-shadow .2s, transform .2s, color .2s;
 }
-.ti-return-btn svg {
-  width: 13px;
-  height: 13px;
-  transition: transform .2s;
-}
-.ti-return-btn:hover {
+.notif-sci-btn:hover {
+  background: rgba(22, 68, 120, .92);
+  box-shadow: 0 0 18px rgba(95, 224, 255, .55);
   color: #fff;
+  transform: translateY(-1px);
 }
-.ti-return-btn:hover svg {
-  transform: translateX(3px);
+.nsb-bracket {
+  color: #5fe0ff;
+  opacity: .8;
 }
 
-@media (max-width: 600px) {
-  .ti-input-wrap { flex-direction: column; }
-  .ti-notify-btn { height: 38px; justify-content: center; }
-  .ti-chamber-footer { justify-content: center; text-align: center; }
+@media (max-width: 640px) {
+  .notif-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .notif-title-box { padding: 6px 16px; width: 100%; text-align: center; }
+  .notif-input-row { flex-direction: column; }
+  .notif-submit-btn { height: 36px; justify-content: center; }
+  .notif-action-row { justify-content: center; }
 }
