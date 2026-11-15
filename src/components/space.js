@@ -232,10 +232,10 @@ export function createSpace(canvas) {
   scene.add(atmosphere);
   atmosphere.position.copy(earth.position);
 
-  // Procedural 3D Moon (Looms & Approaches as Visitor Scrolls)
+  // Procedural 3D Moon (Looms in Deep Space as Visitor Descends from Earth)
   const R_MOON = 7.8;
   const moon = new THREE.Group();
-  moon.position.set(16.5, 10.5, -54.0);
+  moon.position.set(16.0, -8.0, -52.0);
   moon.rotation.set(0.18, -0.32, 0.08);
   scene.add(moon);
 
@@ -292,26 +292,27 @@ export function createSpace(canvas) {
     const dt = Math.min(.05, (t - last) / 1000); last = t; time += dt;
 
     // Ultra-smooth lerping for natural non-awkward momentum
-    scrollRatio += (scrollTarget - scrollRatio) * 0.048;
+    scrollRatio += (scrollTarget - scrollRatio) * 0.052;
 
     pointer.sx += (pointer.x - pointer.sx) * .035;
     pointer.sy += (pointer.y - pointer.sy) * .035;
 
-    // Earth gracefully descends as visitor embarks on orbital flight
-    earth.position.y = -10.85 - scrollRatio * 20.0;
+    // SCROLL EFFECT: Move down from Earth as visitor scrolls down
+    // At scroll = 0: Camera at (0,0,0) overlooks Earth horizon at (0, -10.85, -7.5).
+    // As visitor scrolls: Camera descends DOWN along -Y, looking downwards.
+    // Earth's horizon sweeps gracefully upwards across the screen and overhead,
+    // leaving Earth behind as we plunge down into deep space with the Moon in view.
+    earth.position.y = -10.85 + scrollRatio * 18.5;
+    earth.position.z = -7.5 - scrollRatio * 14.0;
     atmosphere.position.copy(earth.position);
 
-    // Orbital flight trajectory towards the Moon
-    // Stage 1 (0.0): View of Earth horizon, Moon is small in distant upper right
-    // Stage 2 (0.5): Earth glides down, Camera accelerates forward through stars
-    // Stage 3 (1.0): Camera arrives in Moon proximity, Moon fills right sky with realistic detail!
-    currentPos.x = pointer.sx * 0.3 + scrollRatio * 9.5;
-    currentPos.y = -pointer.sy * 0.15 + scrollRatio * 5.8;
-    currentPos.z = -scrollRatio * 32.0;
+    currentPos.x = pointer.sx * 0.35 + scrollRatio * 3.5;
+    currentPos.y = -pointer.sy * 0.15 - scrollRatio * 9.5;
+    currentPos.z = pointer.sy * 0.08 - scrollRatio * 4.0;
 
-    currentLook.x = pointer.sx * 0.1 + scrollRatio * 13.0;
-    currentLook.y = -0.24 - (1.0 - scrollRatio) * 0.2 + scrollRatio * 7.5;
-    currentLook.z = -1.0 - scrollRatio * 36.0;
+    currentLook.x = pointer.sx * 0.12 + scrollRatio * 5.0;
+    currentLook.y = -0.24 - scrollRatio * 11.5;
+    currentLook.z = -1.0 - scrollRatio * 6.0;
 
     camera.position.copy(currentPos);
     camera.lookAt(currentLook);
