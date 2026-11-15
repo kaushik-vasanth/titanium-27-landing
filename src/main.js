@@ -7,6 +7,7 @@ import './styles/sealed.css';
 import { createSpace } from './components/space.js';
 import { toggleAudio, isAudioActive, onAudioStateChange } from './components/audio.js';
 import { headerComponent } from './components/header.js';
+import { runBoot } from './components/boot.js';
 import { renderSealedChamber, bindSealedEvents, closeChamber } from './components/sealedChamber.js';
 import { ICONS } from './components/icons.js';
 
@@ -239,8 +240,23 @@ try {
   console.warn('WebGL space backdrop unavailable', e);
 }
 
-// Render app
+// Render app with preloader handoff
 app.innerHTML = renderLanding();
+app.style.opacity = '0';
+app.style.transition = 'opacity 0.8s ease';
+
+const fontsReady = document.fonts?.ready ?? Promise.resolve();
+const tasks = [
+  fontsReady,
+  new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))),
+];
+
+runBoot({
+  full: true,
+  tasks,
+}).then(() => {
+  app.style.opacity = '1';
+});
 
 // Countdown clock timer
 const digits = [...app.querySelectorAll('[data-unit]')];
